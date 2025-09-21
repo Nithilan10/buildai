@@ -1,0 +1,176 @@
+.arContainer {
+  width: 100%;
+  height: 100%;
+  position: relative;
+  background-color: #0f172a;
+  border-radius: 12px;
+  overflow: hidden;
+}
+
+.arCanvas {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  min-height: 400px;
+}
+
+.canvas {
+  width: 100% !important;
+  height: 100% !important;
+  border-radius: 12px;
+}
+
+.roomBackground {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
+  opacity: 0.3;
+  z-index: -1;
+}
+
+.loadingOverlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-color: rgba(15, 23, 42, 0.9);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  color: white;
+  z-index: 10;
+}
+
+.loadingSpinner {
+  width: 40px;
+  height: 40px;
+  border: 3px solid #334155;
+  border-top: 3px solid #3b82f6;
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+  margin-bottom: 1rem;
+}
+
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
+.controlsPanel {
+  position: absolute;
+  top: 1rem;
+  right: 1rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  z-index: 5;
+}
+
+.controlButton {
+  width: 44px;
+  height: 44px;
+  background-color: rgba(30, 41, 59, 0.8);
+  border: 1px solid #475569;
+  border-radius: 8px;
+  color: #cbd5e1;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.2s ease;
+  backdrop-filter: blur(8px);
+}
+
+.controlButton:hover {
+  background-color: rgba(51, 65, 85, 0.9);
+  border-color: #64748b;
+  color: #e2e8f0;
+  transform: scale(1.05);
+}
+
+.controlButton.active {
+  background-color: #3b82f6;
+  border-color: #2563eb;
+  color: white;
+}
+
+.instructions {
+  position: absolute;
+  bottom: 1rem;
+  left: 50%;
+  transform: translateX(-50%);
+  background-color: rgba(15, 23, 42, 0.8);
+  color: #cbd5e1;
+  padding: 0.75rem 1.5rem;
+  border-radius: 24px;
+  font-size: 0.875rem;
+  backdrop-filter: blur(8px);
+  z-index: 5;
+  white-space: nowrap;
+}
+
+.instructions p {
+  margin: 0;
+}
+
+/* Responsive design */
+@media (max-width: 768px) {
+  .arCanvas {
+    min-height: 300px;
+  }
+
+  .controlsPanel {
+    top: 0.5rem;
+    right: 0.5rem;
+  }
+
+  .controlButton {
+    width: 36px;
+    height: 36px;
+  }
+
+  .instructions {
+    bottom: 0.5rem;
+    padding: 0.5rem 1rem;
+    font-size: 0.8rem;
+  }
+}
+
+@media (max-width: 480px) {
+  .instructions {
+    display: none;
+  }
+
+  .controlsPanel {
+    flex-direction: row;
+    top: 0.5rem;
+    left: 0.5rem;
+    right: auto;
+  }
+}
+
+/* Custom scrollbar for webkit browsers */
+.arContainer::-webkit-scrollbar {
+  width: 6px;
+}
+
+.arContainer::-webkit-scrollbar-track {
+  background: #1e293b;
+  border-radius: 3px;
+}
+
+.arContainer::-webkit-scrollbar-thumb {
+  background: #475569;
+  border-radius: 3px;
+}
+
+.arContainer::-webkit-scrollbar-thumb:hover {
+  background: #64748b;
+}
