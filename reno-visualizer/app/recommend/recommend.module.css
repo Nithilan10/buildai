@@ -1,0 +1,178 @@
+.recommendPage {
+  min-height: 100vh;
+  background: linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%);
+  padding: 2rem 0;
+}
+
+.loadingContainer {
+  height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.container {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 0 1rem;
+}
+
+.header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  margin-bottom: 3rem;
+  padding-bottom: 2rem;
+  border-bottom: 1px solid #e2e8f0;
+}
+
+.headerContent {
+  flex: 1;
+}
+
+.title {
+  font-size: 2.5rem;
+  font-weight: 700;
+  color: #1e293b;
+  margin: 0 0 1rem 0;
+  line-height: 1.2;
+}
+
+.subtitle {
+  font-size: 1.125rem;
+  color: #64748b;
+  margin: 0;
+  max-width: 600px;
+}
+
+.headerActions {
+  display: flex;
+  gap: 1rem;
+  align-items: center;
+}
+
+.personalizeButton,
+.saveButton {
+  padding: 0.75rem 1.5rem;
+  border-radius: 8px;
+  font-size: 0.875rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  border: 1px solid #d1d5db;
+}
+
+.personalizeButton {
+  background-color: white;
+  color: #374151;
+  border-color: #d1d5db;
+}
+
+.personalizeButton:hover {
+  background-color: #f9fafb;
+  border-color: #9ca3af;
+}
+
+.saveButton {
+  background-color: #3b82f6;
+  color: white;
+  border-color: #3b82f6;
+}
+
+.saveButton:hover {
+  background-color: #2563eb;
+  border-color: #2563eb;
+}
+
+.aiInfo {
+  margin-top: 4rem;
+}
+
+.aiCard {
+  background-color: white;
+  border-radius: 16px;
+  padding: 2rem;
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+  border: 1px solid #e2e8f0;
+  display: flex;
+  gap: 1.5rem;
+  align-items: flex-start;
+}
+
+.aiIcon {
+  color: #3b82f6;
+  flex-shrink: 0;
+}
+
+.aiContent {
+  flex: 1;
+}
+
+.aiContent h3 {
+  font-size: 1.25rem;
+  font-weight: 600;
+  color: #1e293b;
+  margin: 0 0 1rem 0;
+}
+
+.aiContent p {
+  color: #64748b;
+  line-height: 1.6;
+  margin: 0;
+}
+
+/* Responsive design */
+@media (max-width: 768px) {
+  .recommendPage {
+    padding: 1rem 0;
+  }
+
+  .container {
+    padding: 0 0.75rem;
+  }
+
+  .header {
+    flex-direction: column;
+    gap: 1.5rem;
+    margin-bottom: 2rem;
+  }
+
+  .title {
+    font-size: 2rem;
+  }
+
+  .subtitle {
+    font-size: 1rem;
+  }
+
+  .headerActions {
+    flex-direction: column;
+    width: 100%;
+  }
+
+  .personalizeButton,
+  .saveButton {
+    width: 100%;
+    justify-content: center;
+  }
+
+  .aiCard {
+    flex-direction: column;
+    padding: 1.5rem;
+    gap: 1rem;
+  }
+}
+
+@media (max-width: 480px) {
+  .title {
+    font-size: 1.75rem;
+  }
+
+  .aiContent h3 {
+    font-size: 1.125rem;
+  }
+
+  .aiContent p {
+    font-size: 0.9rem;
+  }
+}

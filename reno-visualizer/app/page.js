@@ -1,103 +1,232 @@
-import Image from "next/image";
+'use client';
 
-export default function Home() {
+import React, { useState, useEffect } from 'react';
+import NotificationToast from '../components/NotificationToast';
+import LoadingSpinner from '../components/LoadingSpinner';
+import ColorPaletteSwitcher from '../components/ColorPaletteSwitcher';
+import styles from './home.module.css';
+
+export default function HomePage() {
+  const [isLoading, setIsLoading] = useState(false);
+  const [notification, setNotification] = useState(null);
+  const [currentFeature, setCurrentFeature] = useState(0);
+
+  const features = [
+    {
+      title: 'Upload Your Room',
+      description: 'Take a photo of your space and upload it to get started',
+      icon: '📷',
+      href: '/upload'
+    },
+    {
+      title: 'AR Visualization',
+      description: 'See furniture in your room using augmented reality',
+      icon: '🪟',
+      href: '/ar'
+    },
+    {
+      title: 'Product Catalog',
+      description: 'Browse our curated collection of furniture',
+      icon: '🪑',
+      href: '/products'
+    },
+    {
+      title: 'AI Recommendations',
+      description: 'Get personalized suggestions based on your style',
+      icon: '🤖',
+      href: '/recommend'
+    }
+  ];
+
+  useEffect(() => {
+    const timer = setInterval(() => {
+      setCurrentFeature((prev) => (prev + 1) % features.length);
+    }, 4000);
+
+    return () => clearInterval(timer);
+  }, []);
+
+  const handleGetStarted = () => {
+    setIsLoading(true);
+
+    setTimeout(() => {
+      setIsLoading(false);
+      setNotification({
+        message: 'Welcome to Reno Visualizer! Start by uploading a photo of your room.',
+        type: 'success',
+        duration: 5000
+      });
+    }, 1500);
+  };
+
+  const handleFeatureClick = (feature) => {
+    setNotification({
+      message: `Navigating to ${feature.title}...`,
+      type: 'info',
+      duration: 2000
+    });
+
+    setTimeout(() => {
+      window.location.href = feature.href;
+    }, 500);
+  };
+
   return (
-    <div className="font-sans grid grid-rows-[20px_1fr_20px] items-center justify-items-center min-h-screen p-8 pb-20 gap-16 sm:p-20">
-      <main className="flex flex-col gap-[32px] row-start-2 items-center sm:items-start">
-        <Image
-          className="dark:invert"
-          src="/next.svg"
-          alt="Next.js logo"
-          width={180}
-          height={38}
-          priority
-        />
-        <ol className="font-mono list-inside list-decimal text-sm/6 text-center sm:text-left">
-          <li className="mb-2 tracking-[-.01em]">
-            Get started by editing{" "}
-            <code className="bg-black/[.05] dark:bg-white/[.06] font-mono font-semibold px-1 py-0.5 rounded">
-              app/page.js
-            </code>
-            .
-          </li>
-          <li className="tracking-[-.01em]">
-            Save and see your changes instantly.
-          </li>
-        </ol>
+    <div className={styles.homePage}>
+      {/* Hero Section */}
+      <section className={styles.hero}>
+        <div className={styles.heroContent}>
+          <div className={styles.heroText}>
+            <h1 className={styles.heroTitle}>
+              Visualize Furniture in Your Space
+            </h1>
+            <p className={styles.heroSubtitle}>
+              Use augmented reality to see how furniture looks in your room before you buy.
+              Upload a photo, browse products, and place them virtually in your space.
+            </p>
 
-        <div className="flex gap-4 items-center flex-col sm:flex-row">
-          <a
-            className="rounded-full border border-solid border-transparent transition-colors flex items-center justify-center bg-foreground text-background gap-2 hover:bg-[#383838] dark:hover:bg-[#ccc] font-medium text-sm sm:text-base h-10 sm:h-12 px-4 sm:px-5 sm:w-auto"
-            href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            <Image
-              className="dark:invert"
-              src="/vercel.svg"
-              alt="Vercel logomark"
-              width={20}
-              height={20}
-            />
-            Deploy now
-          </a>
-          <a
-            className="rounded-full border border-solid border-black/[.08] dark:border-white/[.145] transition-colors flex items-center justify-center hover:bg-[#f2f2f2] dark:hover:bg-[#1a1a1a] hover:border-transparent font-medium text-sm sm:text-base h-10 sm:h-12 px-4 sm:px-5 w-full sm:w-auto md:w-[158px]"
-            href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Read our docs
-          </a>
+            <div className={styles.heroActions}>
+              <button
+                className={styles.primaryButton}
+                onClick={handleGetStarted}
+                disabled={isLoading}
+              >
+                {isLoading ? (
+                  <LoadingSpinner size="small" color="white" />
+                ) : (
+                  'Get Started'
+                )}
+              </button>
+              <button
+                className={styles.secondaryButton}
+                onClick={() => handleFeatureClick(features[1])}
+              >
+                Try AR Demo
+              </button>
+            </div>
+          </div>
+
+          <div className={styles.heroVisual}>
+            <div className={styles.featureShowcase}>
+              <div className={styles.featureCard}>
+                <div className={styles.featureIcon}>
+                  {features[currentFeature].icon}
+                </div>
+                <h3 className={styles.featureTitle}>
+                  {features[currentFeature].title}
+                </h3>
+                <p className={styles.featureDescription}>
+                  {features[currentFeature].description}
+                </p>
+                <button
+                  className={styles.featureButton}
+                  onClick={() => handleFeatureClick(features[currentFeature])}
+                >
+                  Try Now
+                </button>
+              </div>
+            </div>
+          </div>
         </div>
-      </main>
-      <footer className="row-start-3 flex gap-[24px] flex-wrap items-center justify-center">
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/file.svg"
-            alt="File icon"
-            width={16}
-            height={16}
-          />
-          Learn
-        </a>
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/window.svg"
-            alt="Window icon"
-            width={16}
-            height={16}
-          />
-          Examples
-        </a>
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://nextjs.org?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/globe.svg"
-            alt="Globe icon"
-            width={16}
-            height={16}
-          />
-          Go to nextjs.org →
-        </a>
-      </footer>
+      </section>
+
+      {/* Features Section */}
+      <section className={styles.features}>
+        <div className={styles.container}>
+          <div className={styles.sectionHeader}>
+            <h2 className={styles.sectionTitle}>
+              How It Works
+            </h2>
+            <p className={styles.sectionSubtitle}>
+              Four simple steps to transform your space
+            </p>
+          </div>
+
+          <div className={styles.featuresGrid}>
+            {features.map((feature, index) => (
+              <div
+                key={index}
+                className={styles.featureCard}
+                onClick={() => handleFeatureClick(feature)}
+              >
+                <div className={styles.featureIcon}>
+                  {feature.icon}
+                </div>
+                <h3 className={styles.featureTitle}>
+                  {feature.title}
+                </h3>
+                <p className={styles.featureDescription}>
+                  {feature.description}
+                </p>
+                <button className={styles.featureButton}>
+                  Get Started
+                </button>
+              </div>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* Stats Section */}
+      <section className={styles.stats}>
+        <div className={styles.container}>
+          <div className={styles.statsGrid}>
+            <div className={styles.statItem}>
+              <div className={styles.statNumber}>10K+</div>
+              <div className={styles.statLabel}>Rooms Visualized</div>
+            </div>
+            <div className={styles.statItem}>
+              <div className={styles.statNumber}>500+</div>
+              <div className={styles.statLabel}>Furniture Items</div>
+            </div>
+            <div className={styles.statItem}>
+              <div className={styles.statNumber}>95%</div>
+              <div className={styles.statLabel}>Accuracy Rate</div>
+            </div>
+            <div className={styles.statItem}>
+              <div className={styles.statNumber}>24/7</div>
+              <div className={styles.statLabel}>AI Support</div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* CTA Section */}
+      <section className={styles.cta}>
+        <div className={styles.container}>
+          <div className={styles.ctaContent}>
+            <h2 className={styles.ctaTitle}>
+              Ready to Transform Your Space?
+            </h2>
+            <p className={styles.ctaSubtitle}>
+              Join thousands of users who have already visualized their perfect room.
+            </p>
+            <button
+              className={styles.primaryButton}
+              onClick={() => handleFeatureClick(features[0])}
+            >
+              Start Visualizing Now
+            </button>
+          </div>
+        </div>
+      </section>
+
+      {/* Color Palette Switcher */}
+      <ColorPaletteSwitcher
+        currentPalette="default"
+        position="bottom-right"
+      />
+
+      {/* Notification System */}
+      {notification && (
+        <NotificationToast
+          message={notification.message}
+          type={notification.type}
+          duration={notification.duration}
+          onClose={() => setNotification(null)}
+          position="top-right"
+        />
+      )}
     </div>
   );
 }
