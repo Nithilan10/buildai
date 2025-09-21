@@ -1,9 +1,9 @@
 'use client';
 
 import React, { useState, useEffect } from 'react';
-import ProductCard from '../../components/ProductCard';
-import NotificationToast from '../../components/NotificationToast';
-import LoadingSpinner from '../../components/LoadingSpinner';
+import ProductCard from '../../components/ProductCard.jsx';
+import NotificationToast from '../../components/NotificationToast.jsx';
+import LoadingSpinner from '../../components/LoadingSpinner.jsx';
 import styles from './products.module.css';
 
 export default function ProductsPage() {
@@ -14,6 +14,7 @@ export default function ProductsPage() {
   const [sortBy, setSortBy] = useState('name');
   const [notification, setNotification] = useState(null);
   const [placingProduct, setPlacingProduct] = useState(null);
+  const [isUpdatingCatalog, setIsUpdatingCatalog] = useState(false);
 
   // Mock product catalog
   const mockProducts = [
@@ -97,15 +98,25 @@ export default function ProductsPage() {
     }
   ];
 
-  const categories = ['all', 'Seating', 'Tables', 'Lighting', 'Storage', 'Decor'];
+  const categories = ['all', 'Seating', 'Tables', 'Lighting', 'Storage', 'Decor', 'Bedroom', 'Porcelain Floor & Wall Tile', 'Natural Stone Tile (Slate)', 'Vinyl Tile (Self-Adhesive)', 'Ceramic Tile', 'Porcelain Mosaic Tile (Sheet-Mounted)', 'Ceramic Mosaic Tile', 'Porcelain Paver (Outdoor)', 'Ceramic Floor Tile (Patterned)', 'Porcelain Floor Tile (Wood-Look)'];
 
   useEffect(() => {
-    // Simulate API loading
-    setTimeout(() => {
-      setProducts(mockProducts);
-      setFilteredProducts(mockProducts);
+    // Load products from API
+    const loadProducts = async () => {
+      try {
+        const response = await fetch('/api/products?q=all&category=all&style=all&maxPrice=2000');
+        const data = await response.json();
+        const apiProducts = data.products.length > 0 ? data.products : mockProducts;
+        setProducts(apiProducts);
+        setFilteredProducts(apiProducts);
+      } catch (error) {
+        console.error('Failed to load products:', error);
+        setProducts(mockProducts);
+        setFilteredProducts(mockProducts);
+      }
       setIsLoading(false);
-    }, 1500);
+    };
+    loadProducts();
   }, []);
 
   useEffect(() => {
@@ -157,6 +168,48 @@ export default function ProductsPage() {
       type: 'info',
       duration: 3000
     });
+  };
+
+  const handleUpdateCatalog = async () => {
+    setIsUpdatingCatalog(true);
+    try {
+      const response = await fetch('/api/products/update', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ searchQuery: 'tile' })
+      });
+      
+      const data = await response.json();
+      
+      if (data.success) {
+        setNotification({
+          message: `Catalog updated! Added ${data.productsAdded} new products`,
+          type: 'success',
+          duration: 5000
+        });
+        
+        // Reload products to show the new ones
+        const productsResponse = await fetch('/api/products?q=all&category=all&style=all&maxPrice=2000');
+        const productsData = await productsResponse.json();
+        setProducts(productsData.products);
+        setFilteredProducts(productsData.products);
+      } else {
+        setNotification({
+          message: `Failed to update catalog: ${data.message}`,
+          type: 'error',
+          duration: 5000
+        });
+      }
+    } catch (error) {
+      console.error('Failed to update catalog:', error);
+      setNotification({
+        message: 'Failed to update catalog. Please try again.',
+        type: 'error',
+        duration: 5000
+      });
+    } finally {
+      setIsUpdatingCatalog(false);
+    }
   };
 
   if (isLoading) {
@@ -220,6 +273,16 @@ export default function ProductsPage() {
               <option value="price-high">Price: High to Low</option>
               <option value="rating">Rating</option>
             </select>
+          </div>
+
+          <div className={styles.filterGroup}>
+            <button
+              className={styles.updateButton}
+              onClick={handleUpdateCatalog}
+              disabled={isUpdatingCatalog}
+            >
+              {isUpdatingCatalog ? 'Updating...' : '🔄 Update Catalog'}
+            </button>
           </div>
         </div>
 

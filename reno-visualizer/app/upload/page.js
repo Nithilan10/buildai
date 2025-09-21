@@ -8,23 +8,68 @@ import styles from './upload.module.css';
 
 export default function UploadPage() {
   const [uploadedImage, setUploadedImage] = useState(null);
+  const [roomAnalysis, setRoomAnalysis] = useState(null);
   const [notification, setNotification] = useState(null);
   const [isProcessing, setIsProcessing] = useState(false);
 
-  const handleImageUpload = useCallback((imageData) => {
+  const handleImageUpload = useCallback(async (imageData) => {
     setIsProcessing(true);
 
-    // Simulate processing time
-    setTimeout(() => {
-      setUploadedImage(imageData);
-      setIsProcessing(false);
-
-      setNotification({
-        message: 'Image uploaded successfully! You can now proceed to AR visualization.',
-        type: 'success',
-        duration: 4000
+    try {
+      // First, upload the image to the server to get a public URL
+      const formData = new FormData();
+      formData.append('image', imageData.file);
+      
+      const uploadResponse = await fetch('/api/upload', {
+        method: 'POST',
+        body: formData
       });
-    }, 1500);
+      
+      if (!uploadResponse.ok) {
+        throw new Error('Failed to upload image to server');
+      }
+      
+      const uploadResult = await uploadResponse.json();
+      const serverImageUrl = uploadResult.imageUrl;
+      
+      console.log('Image uploaded to server:', serverImageUrl);
+
+      // Then analyze the room using the server URL
+      const analysisResponse = await fetch('/api/room-analysis', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          imageUrl: serverImageUrl,
+          roomType: 'bathroom'
+        })
+      });
+
+      if (analysisResponse.ok) {
+        const analysisData = await analysisResponse.json();
+        setRoomAnalysis(analysisData.analysis);
+        setUploadedImage({
+          ...imageData,
+          serverUrl: serverImageUrl
+        });
+        
+        setNotification({
+          message: 'Room analyzed successfully! Walls, floor, and fixtures detected.',
+          type: 'success',
+          duration: 4000
+        });
+      } else {
+        throw new Error('Room analysis failed');
+      }
+    } catch (error) {
+      console.error('Upload/analysis error:', error);
+      setNotification({
+        message: 'Failed to analyze room. Please try again.',
+        type: 'error',
+        duration: 5000
+      });
+    } finally {
+      setIsProcessing(false);
+    }
   }, []);
 
   const handleImageError = useCallback((error) => {
@@ -35,10 +80,27 @@ export default function UploadPage() {
     });
   }, []);
 
-  const handleProceedToAR = () => {
-    if (uploadedImage) {
-      // Navigate to AR page with image data
-      window.location.href = `/ar?image=${encodeURIComponent(uploadedImage.previewUrl)}`;
+  const handleProceedToAR = async () => {
+    if (uploadedImage && roomAnalysis) {
+      try {
+        console.log('Proceeding to AR view...');
+        
+        // Store the server image URL and analysis data
+        sessionStorage.setItem('roomImageUrl', uploadedImage.serverUrl);
+        sessionStorage.setItem('roomAnalysisData', JSON.stringify(roomAnalysis));
+        
+        console.log('Stored image URL in sessionStorage, navigating to AR page');
+        
+        // Navigate to AR page
+        window.location.href = '/ar';
+      } catch (error) {
+        console.error('Error preparing image for AR view:', error);
+        setNotification({
+          message: 'Failed to prepare image for AR view. Please try again.',
+          type: 'error',
+          duration: 5000
+        });
+      }
     }
   };
 
@@ -72,7 +134,7 @@ export default function UploadPage() {
                 <div className={styles.processingOverlay}>
                   <LoadingSpinner
                     size="large"
-                    text="Processing your image..."
+                    text="Analyzing your room and detecting walls, floor, and fixtures..."
                     overlay={false}
                   />
                 </div>
@@ -86,9 +148,12 @@ export default function UploadPage() {
                     <polyline points="20,6 9,17 4,12"/>
                   </svg>
                 </div>
-                <h2 className={styles.successTitle}>Image Uploaded Successfully!</h2>
+                <h2 className={styles.successTitle}>Room Analysis Complete!</h2>
                 <p className={styles.successMessage}>
-                  Your room image has been processed and is ready for AR visualization.
+                  {roomAnalysis ? 
+                    `Detected ${roomAnalysis.elements.length} room elements including walls, floor, and fixtures. Ready for AR visualization.` :
+                    'Your room image has been processed and is ready for AR visualization.'
+                  }
                 </p>
 
                 <div className={styles.imagePreview}>

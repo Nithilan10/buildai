@@ -1,7 +1,7 @@
 import fs from "fs";
 import path from "path";
 
-const MODELS_DIR = path.join(process.cwd(), "models");
+const MODELS_DIR = path.join(process.cwd(), "public", "models");
 
 // Ensure the models directory exists
 if (!fs.existsSync(MODELS_DIR)) {
@@ -14,28 +14,29 @@ if (!fs.existsSync(MODELS_DIR)) {
  * @returns {boolean}
  */
 export function modelExists(modelName) {
-  const filePath = path.join(MODELS_DIR, `${modelName}.json`);
+  const filePath = path.join(MODELS_DIR, modelName);
   return fs.existsSync(filePath);
 }
 
 /**
  * Save a model to disk
  * @param {string} modelName
- * @param {object} modelData
+ * @param {Buffer} modelData
+ * @returns {string} URL to the saved model
  */
 export function saveModel(modelName, modelData) {
-  const filePath = path.join(MODELS_DIR, `${modelName}.json`);
-  fs.writeFileSync(filePath, JSON.stringify(modelData, null, 2), "utf-8");
+  const filePath = path.join(MODELS_DIR, modelName);
+  fs.writeFileSync(filePath, modelData);
+  return `/models/${modelName}`;
 }
 
 /**
  * Load a model from disk
  * @param {string} modelName
- * @returns {object|null}
+ * @returns {Buffer|null}
  */
 export function loadModel(modelName) {
-  const filePath = path.join(MODELS_DIR, `${modelName}.json`);
+  const filePath = path.join(MODELS_DIR, modelName);
   if (!fs.existsSync(filePath)) return null;
-  const raw = fs.readFileSync(filePath, "utf-8");
-  return JSON.parse(raw);
+  return fs.readFileSync(filePath);
 }

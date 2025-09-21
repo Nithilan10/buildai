@@ -3,6 +3,7 @@ import { Canvas, useFrame, useThree } from '@react-three/fiber';
 import { OrbitControls, Environment, ContactShadows, useGLTF } from '@react-three/drei';
 import { useSpring, animated } from '@react-spring/three';
 import PropTypes from 'prop-types';
+import Room3D from './Room3D.jsx';
 import styles from './ARCanvas.module.css';
 
 // 3D Furniture Model Component
@@ -67,18 +68,26 @@ function RoomFloor() {
 // Main AR Canvas Component
 const ARCanvas = ({
   roomImage,
+  roomAnalysis,
   placedFurniture = [],
   onFurniturePlace,
   onFurnitureSelect,
   onFurnitureMove,
+  onRoomElementSelect,
   isLoading = false
 }) => {
   const [selectedFurniture, setSelectedFurniture] = useState(null);
   const [cameraMode, setCameraMode] = useState('orbit'); // 'orbit' or 'free'
+  const [selectedRoomElement, setSelectedRoomElement] = useState(null);
 
   const handleFurnitureSelect = (furnitureId) => {
     setSelectedFurniture(furnitureId);
     onFurnitureSelect && onFurnitureSelect(furnitureId);
+  };
+
+  const handleRoomElementSelect = (element) => {
+    setSelectedRoomElement(element);
+    onRoomElementSelect && onRoomElementSelect(element);
   };
 
   const handleCanvasClick = (event) => {
@@ -90,21 +99,52 @@ const ARCanvas = ({
     }
   };
 
+  // Get camera settings from room analysis or use defaults
+  const getCameraSettings = () => {
+    if (roomAnalysis && roomAnalysis.camera) {
+      return {
+        position: roomAnalysis.camera.position,
+        fov: roomAnalysis.camera.fov || 60
+      };
+    }
+    return { position: [0, 2, 5], fov: 60 };
+  };
+
+  // Get lighting settings from room analysis or use defaults
+  const getLightingSettings = () => {
+    if (roomAnalysis && roomAnalysis.lighting) {
+      return {
+        ambient: roomAnalysis.lighting.ambient || 0.6,
+        directional: roomAnalysis.lighting.directional || {
+          position: [10, 10, 5],
+          intensity: 1
+        }
+      };
+    }
+    return {
+      ambient: 0.6,
+      directional: { position: [10, 10, 5], intensity: 1 }
+    };
+  };
+
+  const cameraSettings = getCameraSettings();
+  const lightingSettings = getLightingSettings();
+
   return (
     <div className={styles.arContainer}>
       <div className={styles.arCanvas}>
         <Canvas
-          camera={{ position: [0, 2, 5], fov: 60 }}
+          camera={cameraSettings}
           shadows
           onClick={handleCanvasClick}
           className={styles.canvas}
         >
           <Suspense fallback={null}>
             {/* Lighting */}
-            <ambientLight intensity={0.6} />
+            <ambientLight intensity={lightingSettings.ambient} />
             <directionalLight
-              position={[10, 10, 5]}
-              intensity={1}
+              position={lightingSettings.directional.position}
+              intensity={lightingSettings.directional.intensity}
               castShadow
               shadow-mapSize-width={2048}
               shadow-mapSize-height={2048}
@@ -113,8 +153,15 @@ const ARCanvas = ({
             {/* Environment */}
             <Environment preset="studio" />
 
-            {/* Room Floor */}
-            <RoomFloor />
+            {/* Room 3D Model or Simple Floor */}
+            {roomAnalysis ? (
+              <Room3D 
+                roomAnalysis={roomAnalysis} 
+                onElementSelect={handleRoomElementSelect}
+              />
+            ) : (
+              <RoomFloor />
+            )}
 
             {/* Contact Shadows */}
             <ContactShadows
@@ -192,7 +239,12 @@ const ARCanvas = ({
 
         {/* Instructions */}
         <div className={styles.instructions}>
-          <p>Click on the floor to place furniture • Drag to rotate view • Scroll to zoom</p>
+          <p>
+            {roomAnalysis ? 
+              'Click on room elements to inspect • Click on floor to place furniture • Drag to rotate view • Scroll to zoom' :
+              'Click on the floor to place furniture • Drag to rotate view • Scroll to zoom'
+            }
+          </p>
         </div>
       </div>
     </div>
@@ -201,6 +253,35 @@ const ARCanvas = ({
 
 ARCanvas.propTypes = {
   roomImage: PropTypes.string,
+  roomAnalysis: PropTypes.shape({
+    elements: PropTypes.arrayOf(PropTypes.shape({
+      type: PropTypes.string.isRequired,
+      id: PropTypes.string.isRequired,
+      position: PropTypes.shape({
+        x: PropTypes.number,
+        y: PropTypes.number,
+        z: PropTypes.number
+      }).isRequired,
+      dimensions: PropTypes.shape({
+        width: PropTypes.number,
+        height: PropTypes.number,
+        depth: PropTypes.number
+      }).isRequired,
+      material: PropTypes.string,
+      color: PropTypes.string
+    })),
+    camera: PropTypes.shape({
+      position: PropTypes.arrayOf(PropTypes.number),
+      fov: PropTypes.number
+    }),
+    lighting: PropTypes.shape({
+      ambient: PropTypes.number,
+      directional: PropTypes.shape({
+        position: PropTypes.arrayOf(PropTypes.number),
+        intensity: PropTypes.number
+      })
+    })
+  }),
   placedFurniture: PropTypes.arrayOf(PropTypes.shape({
     id: PropTypes.string.isRequired,
     modelUrl: PropTypes.string,
@@ -211,6 +292,7 @@ ARCanvas.propTypes = {
   onFurniturePlace: PropTypes.func,
   onFurnitureSelect: PropTypes.func,
   onFurnitureMove: PropTypes.func,
+  onRoomElementSelect: PropTypes.func,
   isLoading: PropTypes.bool
 };
 

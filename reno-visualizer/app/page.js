@@ -1,9 +1,9 @@
 'use client';
 
 import React, { useState, useEffect } from 'react';
-import NotificationToast from '../components/NotificationToast';
-import LoadingSpinner from '../components/LoadingSpinner';
-import ColorPaletteSwitcher from '../components/ColorPaletteSwitcher';
+import NotificationToast from '../components/NotificationToast.jsx';
+import LoadingSpinner from '../components/LoadingSpinner.jsx';
+import ColorPaletteSwitcher from '../components/ColorPaletteSwitcher.jsx';
 import styles from './home.module.css';
 
 export default function HomePage() {
